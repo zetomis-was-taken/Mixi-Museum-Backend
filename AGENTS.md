@@ -10,14 +10,26 @@ This repository is the backend for a museum management application. It is built 
 
 ## Project Layout
 ```
-src/
-├── config/          # Config-related utilities and helpers used during development
-├── db/
-│   ├── index.ts     # DrizzleORM client setup
-│   └── schemas/     # All database schemas, written in TypeScript using DrizzleORM's API
-├── app.ts           # Express app setup
-└── index.ts         # Application entry point
+.
+├── src/
+│   ├── config/
+│   │   └── env.ts       # Loads .env.<NODE_ENV> and validates variables with Zod
+│   ├── db/
+│   │   ├── index.ts     # DrizzleORM client + pg Pool setup, closeDb() helper
+│   │   └── schemas/
+│   │       └── index.ts # Barrel re-exporting every table definition
+│   ├── app.ts           # Express app factory (createApp), middleware and routes
+│   └── index.ts         # Application entry point: starts server, graceful shutdown
+├── docker-compose.yml   # Local PostgreSQL service for development
+├── drizzle.config.ts    # drizzle-kit config (schema path, migrations, credentials)
+├── .env.development     # Local dev environment (tracked; matches docker-compose.yml)
+├── .env.production      # Production environment (gitignored)
+├── package.json
+└── tsconfig.json
 ```
+
+Each table (or group of related tables) lives in its own file under `src/db/schemas/`
+and is re-exported from the barrel file so Drizzle sees the full schema.
 
 ## Code Style & Conventions
 - Use **named exports** instead of default exports.
@@ -45,8 +57,17 @@ src/
 > Verify these against `package.json` before running — adjust as needed.
 
 ```bash
-npm install        # install dependencies
-npm run dev        # start the dev server
-npm test           # run unit tests
-npm run build      # compile TypeScript to JS
+npm install          # install dependencies
+docker compose up -d # start the local PostgreSQL server
+npm run dev          # start the dev server (tsx watch)
+npm run typecheck    # type-check without emitting
+npm run build        # compile TypeScript to dist/
+npm start            # run the compiled app with .env.production
+
+npm run db:generate  # generate SQL migrations from the schema
+npm run db:migrate   # apply migrations
+npm run db:push      # push the schema directly to the database
+npm run db:studio    # open Drizzle Studio
 ```
+
+There is no test runner configured yet (`package.json` has no `test` script).
