@@ -13,6 +13,12 @@ const envSchema = z
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     PORT: z.coerce.number().int().min(1).max(65535).default(3000),
     DATABASE_URL: z.string().trim().default(''),
+    // Comma-separated list of exact browser origins allowed to call the API.
+    // Empty means "no cross-origin access"; `*` allows any origin.
+    CORS_ORIGINS: z
+      .string()
+      .trim()
+      .default(nodeEnv === 'development' ? 'http://localhost:5173' : ''),
   })
   .superRefine((value, ctx) => {
     if (value.DATABASE_URL && !/^postgres(ql)?:\/\//.test(value.DATABASE_URL)) {

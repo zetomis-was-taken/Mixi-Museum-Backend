@@ -1,11 +1,13 @@
 import express from 'express';
 import { env } from './config/env.js';
+import { createCorsMiddleware } from './middleware/cors.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { sendSuccess } from './utils/response.js';
 
 export function createApp() {
   const app = express();
 
+  app.use(createCorsMiddleware());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 

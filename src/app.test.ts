@@ -15,6 +15,18 @@ describe('GET /health', () => {
   });
 });
 
+describe('CORS', () => {
+  it('allows the configured frontend origin on preflight', async () => {
+    const response = await request(createApp())
+      .options('/health')
+      .set('Origin', 'http://localhost:5173')
+      .set('Access-Control-Request-Method', 'GET');
+
+    expect(response.status).toBe(204);
+    expect(response.headers['access-control-allow-origin']).toBe('http://localhost:5173');
+  });
+});
+
 describe('unknown routes', () => {
   it('returns 404 in the standard error envelope', async () => {
     const response = await request(createApp()).get('/does-not-exist');

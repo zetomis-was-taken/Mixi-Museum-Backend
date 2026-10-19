@@ -19,7 +19,7 @@ This repository is the backend for a museum management application. It is built 
 │   │   ├── index.ts     # DrizzleORM client + pg Pool setup, closeDb() helper
 │   │   └── schemas/
 │   │       └── index.ts # Barrel re-exporting every table definition
-│   ├── middleware/      # error-handler.ts (global errors + 404), validate.ts (Zod)
+│   ├── middleware/      # error-handler.ts (global errors + 404), validate.ts (Zod), cors.ts (CORS)
 │   ├── routes/          # Express routers mapping endpoints to controllers
 │   ├── services/        # Business logic, kept independent of Express
 │   ├── utils/           # response.ts (sendSuccess/sendError), errors.ts (AppError)
@@ -75,6 +75,14 @@ Every endpoint replies with one of two standard envelopes, and controllers must 
 call `res.json()` directly. The full contract — success/error shapes, per-status
 messages, `AppError`/`ZodError` handling and the `validate` middleware — is documented
 in [docs/global-responses-and-errors.md](docs/global-responses-and-errors.md).
+
+## CORS
+
+`createCorsMiddleware` in `src/middleware/cors.ts` is registered in `createApp`
+before the routes. It only reads `CORS_ORIGINS`: comma-separated exact browser
+origins (empty means no cross-origin access, `*` allows any). Development
+defaults to `http://localhost:5173`. Unknown origins get no CORS headers, and
+Supabase Bearer-token auth needs no cookie credentials.
 
 ## Commands
 > Verify these against `package.json` before running — adjust as needed.
