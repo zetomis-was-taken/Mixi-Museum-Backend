@@ -19,15 +19,16 @@ This repository is the backend for a museum management application. It is built 
 │   │   ├── index.ts     # DrizzleORM client + pg Pool setup, closeDb() helper
 │   │   └── schemas/
 │   │       └── index.ts # Barrel re-exporting every table definition
-│   ├── middleware/      # Express middleware (auth, error handling, etc.)
+│   ├── middleware/      # error-handler.ts (global errors + 404), validate.ts (Zod)
 │   ├── routes/          # Express routers mapping endpoints to controllers
 │   ├── services/        # Business logic, kept independent of Express
-│   ├── utils/           # Shared helpers
+│   ├── utils/           # response.ts (sendSuccess/sendError), errors.ts (AppError)
 │   ├── validators/      # Zod schemas for request/response validation
 │   ├── app.ts           # Express app factory (createApp), middleware and routes
 │   └── index.ts         # Application entry point: starts server, graceful shutdown
 ├── tests/
 │   └── migrations/      # Migration tests, run against the dedicated test database
+├── docs/                # Contributor docs (global responses & errors)
 ├── drizzle/             # Generated SQL migrations + drizzle-kit metadata
 ├── docker-compose.yml   # Local PostgreSQL service for development
 ├── drizzle.config.ts    # drizzle-kit config (schema path, migrations, credentials)
@@ -43,7 +44,7 @@ This repository is the backend for a museum management application. It is built 
 Each table (or group of related tables) lives in its own file under `src/db/schemas/`
 and is re-exported from the barrel file so Drizzle sees the full schema.
 
-`controllers/`, `middleware/`, `routes/`, `services/`, `utils/` and `validators/` are
+`controllers/`, `routes/`, `services/` and `validators/` are
 currently empty scaffolds; add files there following the conventions above.
 
 ## Code Style & Conventions
@@ -67,6 +68,13 @@ currently empty scaffolds; add files there following the conventions above.
 - Unit test files must live **next to** the file they test.  
   Example: `user.service.ts` → `user.service.test.ts`
 - When adding a new service or helper function, **write the corresponding unit test first** (test-first / TDD approach).
+
+## Global Responses & Errors
+
+Every endpoint replies with one of two standard envelopes, and controllers must not
+call `res.json()` directly. The full contract — success/error shapes, per-status
+messages, `AppError`/`ZodError` handling and the `validate` middleware — is documented
+in [docs/global-responses-and-errors.md](docs/global-responses-and-errors.md).
 
 ## Commands
 > Verify these against `package.json` before running — adjust as needed.
