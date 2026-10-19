@@ -28,7 +28,7 @@ This repository is the backend for a museum management application. It is built 
 │   └── index.ts         # Application entry point: starts server, graceful shutdown
 ├── tests/
 │   └── migrations/      # Migration tests, run against the dedicated test database
-├── docs/                # Contributor docs (global responses & errors)
+├── docs/                # Contributor docs (CORS, global responses & errors)
 ├── drizzle/             # Generated SQL migrations + drizzle-kit metadata
 ├── docker-compose.yml   # Local PostgreSQL service for development
 ├── drizzle.config.ts    # drizzle-kit config (schema path, migrations, credentials)
@@ -82,7 +82,8 @@ in [docs/global-responses-and-errors.md](docs/global-responses-and-errors.md).
 before the routes. It only reads `CORS_ORIGINS`: comma-separated exact browser
 origins (empty means no cross-origin access, `*` allows any). Development
 defaults to `http://localhost:5173`. Unknown origins get no CORS headers, and
-Supabase Bearer-token auth needs no cookie credentials.
+Supabase Bearer-token auth needs no cookie credentials. The full guide,
+including frontend usage and debugging, is in [docs/cors.md](docs/cors.md).
 
 ## Commands
 > Verify these against `package.json` before running — adjust as needed.
