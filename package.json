@@ -11,12 +11,9 @@
     "start": "node --env-file=.env.production dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest",
     "test:migration": "vitest run --config vitest.migration.config.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:migrate:test": "node --env-file=.env.test node_modules/drizzle-kit/bin.cjs migrate",
-    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
   "engines": {

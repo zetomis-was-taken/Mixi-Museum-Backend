@@ -77,15 +77,12 @@ docker compose up -d # start the local PostgreSQL server
 npm run dev          # start the dev server (tsx watch)
 npm run typecheck    # type-check without emitting
 npm test             # run unit tests (vitest)
-npm run test:watch   # run unit tests in watch mode
 npm run test:migration # run migration tests (needs the test database)
 npm run build        # compile TypeScript to dist/
 npm start            # run the compiled app with .env.production
 
 npm run db:generate  # generate SQL migrations from the schema
 npm run db:migrate   # apply migrations
-npm run db:migrate:test # apply migrations to the museum_test database
-npm run db:push      # push the schema directly to the database
 npm run db:studio    # open Drizzle Studio
 ```
 
