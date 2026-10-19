@@ -10,9 +10,10 @@
     "build": "tsc",
     "start": "node --env-file=.env.production dist/index.js",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:migration": "vitest run --config vitest.migration.config.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
   "engines": {
@@ -30,6 +31,7 @@
   },
   "homepage": "https://github.com/Mixi-Museum/Backend#readme",
   "dependencies": {
+    "cors": "^2.8.6",
     "dotenv": "^18.0.8",
     "drizzle-orm": "^0.45.4",
     "express": "^5.3.0",
@@ -37,11 +39,15 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.5",
     "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.1",
     "drizzle-kit": "^0.31.11",
+    "supertest": "^7.3.1",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
   }
 }
