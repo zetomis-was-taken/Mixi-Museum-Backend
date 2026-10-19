@@ -14,10 +14,16 @@ This repository is the backend for a museum management application. It is built 
 ├── src/
 │   ├── config/
 │   │   └── env.ts       # Loads .env.<NODE_ENV> and validates variables with Zod
+│   ├── controllers/     # Request handlers: read input, call services, send responses
 │   ├── db/
 │   │   ├── index.ts     # DrizzleORM client + pg Pool setup, closeDb() helper
 │   │   └── schemas/
 │   │       └── index.ts # Barrel re-exporting every table definition
+│   ├── middleware/      # Express middleware (auth, error handling, etc.)
+│   ├── routes/          # Express routers mapping endpoints to controllers
+│   ├── services/        # Business logic, kept independent of Express
+│   ├── utils/           # Shared helpers
+│   ├── validators/      # Zod schemas for request/response validation
 │   ├── app.ts           # Express app factory (createApp), middleware and routes
 │   └── index.ts         # Application entry point: starts server, graceful shutdown
 ├── docker-compose.yml   # Local PostgreSQL service for development
@@ -30,6 +36,9 @@ This repository is the backend for a museum management application. It is built 
 
 Each table (or group of related tables) lives in its own file under `src/db/schemas/`
 and is re-exported from the barrel file so Drizzle sees the full schema.
+
+`controllers/`, `middleware/`, `routes/`, `services/`, `utils/` and `validators/` are
+currently empty scaffolds; add files there following the conventions above.
 
 ## Code Style & Conventions
 - Use **named exports** instead of default exports.
