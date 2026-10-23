@@ -1,16 +1,40 @@
 import request from 'supertest';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from './app.js';
+import { checkDb } from './db/index.js';
+
+vi.mock('./db/index.js', () => ({ checkDb: vi.fn() }));
+
+const mockCheckDb = vi.mocked(checkDb);
 
 describe('GET /health', () => {
-  it('returns the service status', async () => {
+  beforeEach(() => {
+    mockCheckDb.mockReset();
+  });
+
+  it('reports the database as connected', async () => {
+    mockCheckDb.mockResolvedValue(true);
+
     const response = await request(createApp()).get('/health');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
       success: true,
       message: 'OK',
-      data: { status: 'ok', env: 'test' },
+      data: { status: 'ok', env: 'test', database: 'connected' },
+    });
+  });
+
+  it('reports the database as disconnected', async () => {
+    mockCheckDb.mockResolvedValue(false);
+
+    const response = await request(createApp()).get('/health');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      success: true,
+      message: 'OK',
+      data: { status: 'ok', env: 'test', database: 'disconnected' },
     });
   });
 });
