@@ -66,7 +66,7 @@ exactly.
 | `*` | any origin |
 | empty | no cross-origin browser access (default outside development) |
 
-**Development** — `.env.development` already contains:
+**Development** — the root `.env` should contain:
 
 ```env
 CORS_ORIGINS=http://localhost:5173
@@ -76,9 +76,8 @@ Use the origin your dev server actually shows. Vite defaults to `5173`; a
 Next.js dev server usually takes `3000`, which collides with the API port, so
 move one of them. If you browse via `127.0.0.1`, list that origin too.
 
-**Production** — set the real frontend origin in the host's environment
-variables (or use the optional local `.env.production` start command), then
-restart/redeploy:
+**Production** — set the real frontend origin in the root `.env` or in the
+host's environment variables, then restart/redeploy:
 
 ```env
 CORS_ORIGINS=https://museum.example.com
@@ -109,14 +108,10 @@ configuration.
 
 ## Production startup
 
-The default `npm start` command runs `node dist/index.js` and reads configuration
-from the host process environment. This is the recommended deployment mode for
-containers and hosted services, where secrets and environment variables are
-provided by the platform.
-
-For local production-mode testing with the tracked environment-file convention,
-run `npm run start:env-file` after building. That command explicitly loads
-`.env.production` with Node's `--env-file` option.
+The default `npm start` command runs `node dist/index.js` and requires the root
+`.env` file. Values provided by the host process take precedence over values in
+`.env`, so deployments can inject secrets without checking the file into source
+control.
 
 ## Verifying manually
 

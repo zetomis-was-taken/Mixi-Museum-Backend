@@ -18,11 +18,10 @@ function journalEntryCount(): number {
   return journal.entries.length;
 }
 
-// `docker compose up -d` only creates the default database, so make sure the
-// dedicated test database exists before the migrations run against it.
+// Make sure the configured migration database exists before migrations run.
 async function ensureTestDatabase(): Promise<void> {
   if (!env.DATABASE_URL) {
-    throw new Error('DATABASE_URL must be set in .env.test to run migration tests');
+    throw new Error('DATABASE_URL must be set in .env to run migration tests');
   }
 
   const url = new URL(env.DATABASE_URL);

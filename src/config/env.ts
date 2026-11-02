@@ -1,12 +1,14 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
-const nodeEnv = process.env.NODE_ENV ?? 'development';
+const envFile = dotenv.config({ quiet: true });
 
-// Load the file that matches the current environment. Variables already set in
-// the process (e.g. by the hosting platform) take precedence, because dotenv
-// does not override existing values.
-dotenv.config({ path: `.env.${nodeEnv}`, quiet: true });
+if (envFile.error) {
+  console.error('Required .env file was not found. Create a root .env file before starting the application.');
+  process.exit(1);
+}
+
+const nodeEnv = process.env.NODE_ENV ?? 'development';
 
 const envSchema = z
   .object({

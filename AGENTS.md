@@ -13,7 +13,7 @@ This repository is the backend for a museum management application. It is built 
 .
 ├── src/
 │   ├── config/
-│   │   └── env.ts       # Loads .env.<NODE_ENV> and validates variables with Zod
+│   │   └── env.ts       # Loads required root .env and validates variables with Zod
 │   ├── controllers/     # Request handlers: read input, call services, send responses
 │   ├── db/
 │   │   ├── index.ts     # DrizzleORM client + pg Pool setup, closeDb() helper
@@ -30,13 +30,10 @@ This repository is the backend for a museum management application. It is built 
 │   └── migrations/      # Migration tests, run against the dedicated test database
 ├── docs/                # Contributor docs (CORS, global responses & errors)
 ├── drizzle/             # Generated SQL migrations + drizzle-kit metadata
-├── docker-compose.yml   # Local PostgreSQL service for development
 ├── drizzle.config.ts    # drizzle-kit config (schema path, migrations, credentials)
 ├── vitest.config.ts     # Vitest config for unit tests (src/**/*.test.ts)
 ├── vitest.migration.config.ts # Vitest config for migration tests (tests/migrations)
-├── .env.development     # Local dev environment (tracked; matches docker-compose.yml)
-├── .env.test            # Test environment, points at the museum_test database
-├── .env.production      # Production environment (gitignored)
+├── .env                 # Required local/production environment configuration (gitignored)
 ├── package.json
 └── tsconfig.json
 ```
@@ -90,13 +87,13 @@ including frontend usage and debugging, is in [docs/cors.md](docs/cors.md).
 
 ```bash
 npm install          # install dependencies
-docker compose up -d # start the local PostgreSQL server
+# Configure PostgreSQL externally; see DATABASE_URL in the root .env
 npm run dev          # start the dev server (tsx watch)
 npm run typecheck    # type-check without emitting
 npm test             # run unit tests (vitest)
 npm run test:migration # run migration tests (needs the test database)
 npm run build        # compile TypeScript to dist/
-npm start            # run the compiled app with .env.production
+npm start            # run the compiled app with the root .env
 
 npm run db:generate  # generate SQL migrations from the schema
 npm run db:migrate   # apply migrations
@@ -104,5 +101,5 @@ npm run db:studio    # open Drizzle Studio
 ```
 
 Unit tests (`*.test.ts`) live next to the code they test and run without a database.
-Migration tests live in `tests/migrations/` and use the `museum_test` database from
-`docker-compose.yml` (configured in `.env.test`). They need `docker compose up -d` first.
+Migration tests live in `tests/migrations/` and use the PostgreSQL database configured
+by `DATABASE_URL` in the root `.env`. The database must be provisioned externally.

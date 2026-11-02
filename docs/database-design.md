@@ -442,7 +442,7 @@ reserved for that and the keys are TBD.
 1. Write/adjust the Drizzle table in `src/db/schemas/<aggregate>.ts`.
 2. Re-export it from `src/db/schemas/index.ts`.
 3. `npm run db:generate` and review the generated SQL in `drizzle/`.
-4. Apply with `npm run db:migrate` (test DB: `.env.test` + `npm run test:migration`).
+4. Apply with `npm run db:migrate` (configure `DATABASE_URL` in `.env`; run `npm run test:migration` against an externally provisioned test database).
 5. Add or update the migration test in `tests/migrations/`.
 6. Add service unit tests next to the service (test-first, per `AGENTS.md`).
 

@@ -1,8 +1,11 @@
 import dotenv from 'dotenv';
 import { defineConfig } from 'drizzle-kit';
 
-const nodeEnv = process.env.NODE_ENV ?? 'development';
-dotenv.config({ path: `.env.${nodeEnv}`, quiet: true });
+const envFile = dotenv.config({ quiet: true });
+
+if (envFile.error) {
+  throw new Error('Required .env file was not found. Create a root .env file before running Drizzle commands.');
+}
 
 export default defineConfig({
   schema: './src/db/schemas',
