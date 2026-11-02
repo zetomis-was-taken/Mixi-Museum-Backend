@@ -25,7 +25,7 @@ const envSchema = z
     CORS_ORIGINS: z
       .string()
       .trim()
-      .default(nodeEnv === 'development' ? 'http://localhost:5173' : ''),
+      .default(nodeEnv === 'production' ? '' : 'http://localhost:5173'),
   })
   .superRefine((value, ctx) => {
     if (value.DATABASE_URL && !/^postgres(ql)?:\/\//.test(value.DATABASE_URL)) {
