@@ -13,6 +13,11 @@ const envSchema = z
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     PORT: z.coerce.number().int().min(1).max(65535).default(3000),
     DATABASE_URL: z.string().trim().default(''),
+    S3_ENDPOINT: z.string().trim().default(''),
+    S3_ACCESS_KEY_ID: z.string().trim().default(''),
+    S3_SECRET_ACCESS_KEY: z.string().trim().default(''),
+    S3_BUCKET: z.string().trim().default(''),
+    S3_REGION: z.string().trim().default(''),
     // Comma-separated list of exact browser origins allowed to call the API.
     // Empty means "no cross-origin access"; `*` allows any origin.
     CORS_ORIGINS: z
@@ -35,6 +40,26 @@ const envSchema = z
         path: ['DATABASE_URL'],
         message: 'is required in production',
       });
+    }
+
+    if (value.NODE_ENV === 'production') {
+      const storageFields = [
+        'S3_ENDPOINT',
+        'S3_ACCESS_KEY_ID',
+        'S3_SECRET_ACCESS_KEY',
+        'S3_BUCKET',
+        'S3_REGION',
+      ] as const;
+
+      for (const field of storageFields) {
+        if (!value[field]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [field],
+            message: 'is required in production',
+          });
+        }
+      }
     }
   });
 
