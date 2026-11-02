@@ -1,6 +1,7 @@
-// Barrel for all Drizzle table definitions.
-//
-// Put each table (or group of related tables) in its own file inside this
-// folder and re-export it here so Drizzle sees the full schema:
-//
-// export * from './users.js';
+export * from './enums.js';
+export * from './auth.js';
+export * from './museums.js';
+export * from './collections.js';
+export * from './commerce.js';
+export * from './invoices.js';
+export * from './tickets.js';

@@ -19,6 +19,8 @@ const envSchema = z
       .string()
       .trim()
       .default(nodeEnv === 'development' ? 'http://localhost:5173' : ''),
+    JWT_SECRET: z.string().min(16).default('super-secret-development-jwt-key-32chars!'),
+    JWT_EXPIRES_IN: z.string().default('7d'),
   })
   .superRefine((value, ctx) => {
     if (value.DATABASE_URL && !/^postgres(ql)?:\/\//.test(value.DATABASE_URL)) {
@@ -34,6 +36,17 @@ const envSchema = z
         code: 'custom',
         path: ['DATABASE_URL'],
         message: 'is required in production',
+      });
+    }
+
+    if (
+      value.NODE_ENV === 'production' &&
+      value.JWT_SECRET === 'super-secret-development-jwt-key-32chars!'
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['JWT_SECRET'],
+        message: 'must be overridden with a secure secret in production',
       });
     }
   });

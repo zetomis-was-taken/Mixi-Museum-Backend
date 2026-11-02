@@ -3,6 +3,7 @@ import { env } from './config/env.js';
 import { checkDb } from './db/index.js';
 import { createCorsMiddleware } from './middleware/cors.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
+import { router } from './routes/index.js';
 import { sendSuccess } from './utils/response.js';
 
 export function createApp() {
@@ -17,6 +18,8 @@ export function createApp() {
 
     sendSuccess(res, { status: 'ok', env: env.NODE_ENV, database });
   });
+
+  app.use(router);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
