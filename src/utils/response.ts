@@ -13,6 +13,7 @@ export const HttpStatus = {
   CONFLICT: 409,
   UNPROCESSABLE_ENTITY: 422,
   TOO_MANY_REQUESTS: 429,
+  SERVICE_UNAVAILABLE: 503,
   INTERNAL_SERVER_ERROR: 500,
 } as const;
 
@@ -30,6 +31,7 @@ const STATUS_MESSAGES: Record<number, string> = {
   [HttpStatus.CONFLICT]: 'Conflict',
   [HttpStatus.UNPROCESSABLE_ENTITY]: 'Unprocessable entity',
   [HttpStatus.TOO_MANY_REQUESTS]: 'Too many requests',
+  [HttpStatus.SERVICE_UNAVAILABLE]: 'Service unavailable',
   [HttpStatus.INTERNAL_SERVER_ERROR]: 'Internal server error',
 };
 

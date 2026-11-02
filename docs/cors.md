@@ -76,8 +76,9 @@ Use the origin your dev server actually shows. Vite defaults to `5173`; a
 Next.js dev server usually takes `3000`, which collides with the API port, so
 move one of them. If you browse via `127.0.0.1`, list that origin too.
 
-**Production** — set the real frontend origin in `.env.production` or your
-host's environment variables, then restart/redeploy:
+**Production** — set the real frontend origin in the host's environment
+variables (or use the optional local `.env.production` start command), then
+restart/redeploy:
 
 ```env
 CORS_ORIGINS=https://museum.example.com
@@ -105,6 +106,17 @@ const response = await fetch(`${API_URL}/artworks`, {
 `API_URL` is `http://localhost:3000` in development and the deployed API host in
 production. Login and signup go directly to Supabase and are unaffected by this
 configuration.
+
+## Production startup
+
+The default `npm start` command runs `node dist/index.js` and reads configuration
+from the host process environment. This is the recommended deployment mode for
+containers and hosted services, where secrets and environment variables are
+provided by the platform.
+
+For local production-mode testing with the tracked environment-file convention,
+run `npm run start:env-file` after building. That command explicitly loads
+`.env.production` with Node's `--env-file` option.
 
 ## Verifying manually
 
