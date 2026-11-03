@@ -27,7 +27,7 @@ export const ticketTypes = pgTable(
       .references(() => museums.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     description: text('description'),
-    priceMinor: bigint('price_minor', { mode: 'number' }).notNull(),
+    priceMinor: bigint('price_minor', { mode: 'bigint' }).notNull(),
     dateMode: ticketDateModeEnum('date_mode').default('open').notNull(),
     validDate: date('valid_date'),
     timeMode: ticketTimeModeEnum('time_mode').default('all_day').notNull(),
@@ -77,7 +77,7 @@ export const tickets = pgTable(
       .notNull()
       .references(() => invoices.id, { onDelete: 'restrict' }),
     currency: char('currency', { length: 3 }).notNull(),
-    faceValueMinor: bigint('face_value_minor', { mode: 'number' }).notNull(),
+    faceValueMinor: bigint('face_value_minor', { mode: 'bigint' }).notNull(),
     qrCode: text('qr_code').notNull().unique(),
     status: ticketStatusEnum('status').default('valid').notNull(),
     validDate: date('valid_date').notNull(),

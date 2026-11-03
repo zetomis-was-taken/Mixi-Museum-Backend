@@ -24,7 +24,7 @@ export const products = pgTable(
     name: text('name').notNull(),
     slug: text('slug').notNull(),
     description: text('description'),
-    priceMinor: bigint('price_minor', { mode: 'number' }).notNull(),
+    priceMinor: bigint('price_minor', { mode: 'bigint' }).notNull(),
     stockQuantity: integer('stock_quantity').default(0).notNull(),
     status: contentStatusEnum('status').default('draft').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
