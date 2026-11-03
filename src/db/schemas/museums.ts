@@ -10,6 +10,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { users } from './auth.js';
+import { museumVisibilityStatusEnum } from './enums.js';
 
 export const museums = pgTable('museums', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -21,6 +22,7 @@ export const museums = pgTable('museums', {
   longitude: numeric('longitude', { precision: 9, scale: 6 }),
   coverImagePath: text('cover_image_path'),
   currency: char('currency', { length: 3 }).default('USD').notNull(),
+  visibilityStatus: museumVisibilityStatusEnum('visibility_status').default('draft').notNull(),
   shopEnabled: boolean('shop_enabled').default(false).notNull(),
   ticketsEnabled: boolean('tickets_enabled').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -62,4 +64,3 @@ export const museumAdmins = pgTable(
     unique('museum_admins_museum_id_user_id_unique').on(table.museumId, table.userId),
   ],
 );
-

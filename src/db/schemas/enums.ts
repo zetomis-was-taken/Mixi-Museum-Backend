@@ -1,8 +1,12 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
 
-export const userRoleEnum = pgEnum('user_role', ['user', 'admin']);
-
 export const contentStatusEnum = pgEnum('content_status', [
+  'draft',
+  'published',
+  'archived',
+]);
+
+export const museumVisibilityStatusEnum = pgEnum('museum_visibility_status', [
   'draft',
   'published',
   'archived',
@@ -36,4 +40,3 @@ export const ticketStatusEnum = pgEnum('ticket_status', [
   'cancelled',
   'expired',
 ]);
-

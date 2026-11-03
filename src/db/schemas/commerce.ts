@@ -1,9 +1,9 @@
 import { sql } from 'drizzle-orm';
 import {
+  bigint,
   check,
   index,
   integer,
-  numeric,
   pgTable,
   text,
   timestamp,
@@ -24,7 +24,7 @@ export const products = pgTable(
     name: text('name').notNull(),
     slug: text('slug').notNull(),
     description: text('description'),
-    price: numeric('price', { precision: 10, scale: 2 }).notNull(),
+    priceMinor: bigint('price_minor', { mode: 'number' }).notNull(),
     stockQuantity: integer('stock_quantity').default(0).notNull(),
     status: contentStatusEnum('status').default('draft').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -33,7 +33,7 @@ export const products = pgTable(
   (table) => [
     unique('products_museum_id_slug_unique').on(table.museumId, table.slug),
     index('products_museum_id_status_index').on(table.museumId, table.status),
-    check('products_price_check', sql`${table.price} >= 0`),
+    check('products_price_minor_check', sql`${table.priceMinor} >= 0`),
     check('products_stock_quantity_check', sql`${table.stockQuantity} >= 0`),
   ],
 );
@@ -76,7 +76,7 @@ export const cartItems = pgTable(
       .references(() => carts.id, { onDelete: 'cascade' }),
     productId: uuid('product_id')
       .notNull()
-      .references(() => products.id, { onDelete: 'restrict' }),
+      .references(() => products.id, { onDelete: 'cascade' }),
     quantity: integer('quantity').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
@@ -85,4 +85,3 @@ export const cartItems = pgTable(
     check('cart_items_quantity_check', sql`${table.quantity} >= 1`),
   ],
 );
-

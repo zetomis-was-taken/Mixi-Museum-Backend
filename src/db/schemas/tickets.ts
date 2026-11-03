@@ -1,11 +1,12 @@
 import { desc, sql } from 'drizzle-orm';
 import {
+  bigint,
   boolean,
+  char,
   check,
   date,
   index,
   integer,
-  numeric,
   pgTable,
   text,
   time,
@@ -14,7 +15,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { users } from './auth.js';
 import { ticketDateModeEnum, ticketStatusEnum, ticketTimeModeEnum } from './enums.js';
-import { invoices } from './invoices.js';
+import { invoiceItems, invoices } from './invoices.js';
 import { museums } from './museums.js';
 
 export const ticketTypes = pgTable(
@@ -26,7 +27,7 @@ export const ticketTypes = pgTable(
       .references(() => museums.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     description: text('description'),
-    price: numeric('price', { precision: 10, scale: 2 }).notNull(),
+    priceMinor: bigint('price_minor', { mode: 'number' }).notNull(),
     dateMode: ticketDateModeEnum('date_mode').default('open').notNull(),
     validDate: date('valid_date'),
     timeMode: ticketTimeModeEnum('time_mode').default('all_day').notNull(),
@@ -40,7 +41,7 @@ export const ticketTypes = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    check('ticket_types_price_check', sql`${table.price} >= 0`),
+    check('ticket_types_price_minor_check', sql`${table.priceMinor} >= 0`),
     check(
       'ticket_types_fixed_date_check',
       sql`${table.dateMode} <> 'fixed' OR ${table.validDate} IS NOT NULL`,
@@ -66,12 +67,17 @@ export const tickets = pgTable(
     ticketTypeId: uuid('ticket_type_id')
       .notNull()
       .references(() => ticketTypes.id, { onDelete: 'restrict' }),
+    invoiceItemId: uuid('invoice_item_id')
+      .notNull()
+      .references(() => invoiceItems.id, { onDelete: 'restrict' }),
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'restrict' }),
     invoiceId: uuid('invoice_id')
       .notNull()
       .references(() => invoices.id, { onDelete: 'restrict' }),
+    currency: char('currency', { length: 3 }).notNull(),
+    faceValueMinor: bigint('face_value_minor', { mode: 'number' }).notNull(),
     qrCode: text('qr_code').notNull().unique(),
     status: ticketStatusEnum('status').default('valid').notNull(),
     validDate: date('valid_date').notNull(),
@@ -83,6 +89,6 @@ export const tickets = pgTable(
   (table) => [
     index('tickets_user_id_purchased_at_index').on(table.userId, desc(table.purchasedAt)),
     index('tickets_museum_id_valid_date_index').on(table.museumId, table.validDate),
+    check('tickets_face_value_minor_check', sql`${table.faceValueMinor} >= 0`),
   ],
 );
-

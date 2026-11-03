@@ -1,57 +1,9 @@
 {
-  "id": "413261ff-aa52-45aa-b26b-93c7dc6c7a78",
+  "id": "21cf7c3c-6bbc-4fa8-a45b-9202fedbe12c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.user_roles": {
-      "name": "user_roles",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "user_role",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "user_roles_user_id_users_id_fk": {
-          "name": "user_roles_user_id_users_id_fk",
-          "tableFrom": "user_roles",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "user_roles_user_id_role_pk": {
-          "name": "user_roles_user_id_role_pk",
-          "columns": [
-            "user_id",
-            "role"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -65,12 +17,6 @@
         },
         "email": {
           "name": "email",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "password_hash": {
-          "name": "password_hash",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -90,12 +36,6 @@
         "avatar_url": {
           "name": "avatar_url",
           "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "email_verified_at": {
-          "name": "email_verified_at",
-          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
@@ -497,7 +437,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -704,9 +644,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "price": {
-          "name": "price",
-          "type": "numeric(10, 2)",
+        "price_minor": {
+          "name": "price_minor",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
@@ -791,9 +731,9 @@
       },
       "policies": {},
       "checkConstraints": {
-        "products_price_check": {
-          "name": "products_price_check",
-          "value": "\"products\".\"price\" >= 0"
+        "products_price_minor_check": {
+          "name": "products_price_minor_check",
+          "value": "\"products\".\"price_minor\" >= 0"
         },
         "products_stock_quantity_check": {
           "name": "products_stock_quantity_check",
@@ -1039,6 +979,14 @@
           "notNull": true,
           "default": "'USD'"
         },
+        "visibility_status": {
+          "name": "visibility_status",
+          "type": "museum_visibility_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
         "shop_enabled": {
           "name": "shop_enabled",
           "type": "boolean",
@@ -1119,9 +1067,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "unit_price": {
-          "name": "unit_price",
-          "type": "numeric(10, 2)",
+        "unit_price_minor": {
+          "name": "unit_price_minor",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
@@ -1178,9 +1126,9 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {
-        "invoice_items_unit_price_check": {
-          "name": "invoice_items_unit_price_check",
-          "value": "\"invoice_items\".\"unit_price\" >= 0"
+        "invoice_items_unit_price_minor_check": {
+          "name": "invoice_items_unit_price_minor_check",
+          "value": "\"invoice_items\".\"unit_price_minor\" >= 0"
         },
         "invoice_items_quantity_check": {
           "name": "invoice_items_quantity_check",
@@ -1231,15 +1179,15 @@
           "notNull": true,
           "default": "'pending'"
         },
-        "subtotal": {
-          "name": "subtotal",
-          "type": "numeric(10, 2)",
+        "subtotal_minor": {
+          "name": "subtotal_minor",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
-        "total": {
-          "name": "total",
-          "type": "numeric(10, 2)",
+        "total_minor": {
+          "name": "total_minor",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
@@ -1248,6 +1196,36 @@
           "type": "char(3)",
           "primaryKey": false,
           "notNull": true
+        },
+        "billing_email": {
+          "name": "billing_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "billing_name": {
+          "name": "billing_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shipping_name": {
+          "name": "shipping_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shipping_phone": {
+          "name": "shipping_phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shipping_address": {
+          "name": "shipping_address",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -1318,13 +1296,13 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {
-        "invoices_subtotal_check": {
-          "name": "invoices_subtotal_check",
-          "value": "\"invoices\".\"subtotal\" >= 0"
+        "invoices_subtotal_minor_check": {
+          "name": "invoices_subtotal_minor_check",
+          "value": "\"invoices\".\"subtotal_minor\" >= 0"
         },
-        "invoices_total_check": {
-          "name": "invoices_total_check",
-          "value": "\"invoices\".\"total\" >= 0"
+        "invoices_total_minor_check": {
+          "name": "invoices_total_minor_check",
+          "value": "\"invoices\".\"total_minor\" >= 0"
         }
       },
       "isRLSEnabled": false
@@ -1358,9 +1336,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "price": {
-          "name": "price",
-          "type": "numeric(10, 2)",
+        "price_minor": {
+          "name": "price_minor",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
@@ -1458,9 +1436,9 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {
-        "ticket_types_price_check": {
-          "name": "ticket_types_price_check",
-          "value": "\"ticket_types\".\"price\" >= 0"
+        "ticket_types_price_minor_check": {
+          "name": "ticket_types_price_minor_check",
+          "value": "\"ticket_types\".\"price_minor\" >= 0"
         },
         "ticket_types_fixed_date_check": {
           "name": "ticket_types_fixed_date_check",
@@ -1500,6 +1478,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "invoice_item_id": {
+          "name": "invoice_item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
         "user_id": {
           "name": "user_id",
           "type": "uuid",
@@ -1509,6 +1493,18 @@
         "invoice_id": {
           "name": "invoice_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "face_value_minor": {
+          "name": "face_value_minor",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
@@ -1629,6 +1625,19 @@
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
+        "tickets_invoice_item_id_invoice_items_id_fk": {
+          "name": "tickets_invoice_item_id_invoice_items_id_fk",
+          "tableFrom": "tickets",
+          "tableTo": "invoice_items",
+          "columnsFrom": [
+            "invoice_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
         "tickets_user_id_users_id_fk": {
           "name": "tickets_user_id_users_id_fk",
           "tableFrom": "tickets",
@@ -1667,7 +1676,12 @@
         }
       },
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "tickets_face_value_minor_check": {
+          "name": "tickets_face_value_minor_check",
+          "value": "\"tickets\".\"face_value_minor\" >= 0"
+        }
+      },
       "isRLSEnabled": false
     }
   },
@@ -1699,6 +1713,15 @@
         "refunded"
       ]
     },
+    "public.museum_visibility_status": {
+      "name": "museum_visibility_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published",
+        "archived"
+      ]
+    },
     "public.ticket_date_mode": {
       "name": "ticket_date_mode",
       "schema": "public",
@@ -1723,14 +1746,6 @@
       "values": [
         "all_day",
         "slot"
-      ]
-    },
-    "public.user_role": {
-      "name": "user_role",
-      "schema": "public",
-      "values": [
-        "user",
-        "admin"
       ]
     }
   },

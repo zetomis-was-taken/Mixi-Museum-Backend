@@ -1,10 +1,11 @@
 import { desc, sql } from 'drizzle-orm';
 import {
+  bigint,
   char,
   check,
   index,
   integer,
-  numeric,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -28,16 +29,21 @@ export const invoices = pgTable(
       .references(() => museums.id, { onDelete: 'restrict' }),
     kind: invoiceKindEnum('kind').notNull(),
     status: invoiceStatusEnum('status').default('pending').notNull(),
-    subtotal: numeric('subtotal', { precision: 10, scale: 2 }).notNull(),
-    total: numeric('total', { precision: 10, scale: 2 }).notNull(),
+    subtotalMinor: bigint('subtotal_minor', { mode: 'number' }).notNull(),
+    totalMinor: bigint('total_minor', { mode: 'number' }).notNull(),
     currency: char('currency', { length: 3 }).notNull(),
+    billingEmail: text('billing_email').notNull(),
+    billingName: text('billing_name').notNull(),
+    shippingName: text('shipping_name'),
+    shippingPhone: text('shipping_phone'),
+    shippingAddress: jsonb('shipping_address'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     paidAt: timestamp('paid_at', { withTimezone: true }),
   },
   (table) => [
     index('invoices_user_id_created_at_index').on(table.userId, desc(table.createdAt)),
-    check('invoices_subtotal_check', sql`${table.subtotal} >= 0`),
-    check('invoices_total_check', sql`${table.total} >= 0`),
+    check('invoices_subtotal_minor_check', sql`${table.subtotalMinor} >= 0`),
+    check('invoices_total_minor_check', sql`${table.totalMinor} >= 0`),
   ],
 );
 
@@ -53,11 +59,11 @@ export const invoiceItems = pgTable(
       onDelete: 'restrict',
     }),
     description: text('description').notNull(),
-    unitPrice: numeric('unit_price', { precision: 10, scale: 2 }).notNull(),
+    unitPriceMinor: bigint('unit_price_minor', { mode: 'number' }).notNull(),
     quantity: integer('quantity').notNull(),
   },
   (table) => [
-    check('invoice_items_unit_price_check', sql`${table.unitPrice} >= 0`),
+    check('invoice_items_unit_price_minor_check', sql`${table.unitPriceMinor} >= 0`),
     check('invoice_items_quantity_check', sql`${table.quantity} >= 1`),
     check(
       'invoice_items_target_check',
@@ -65,4 +71,3 @@ export const invoiceItems = pgTable(
     ),
   ],
 );
-
