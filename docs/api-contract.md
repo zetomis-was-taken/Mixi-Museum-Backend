@@ -39,7 +39,7 @@ The following route classes require an authenticated user:
 - Checkout and own invoices
 - Own issued tickets
 
-Admin routes are tenant-scoped by `museum_id`. Every lookup and mutation must enforce the authenticated user's membership in that same museum; an ID alone must never determine tenant access.
+Admin routes are tenant-scoped by `museum_id`. Every lookup and mutation must enforce the authenticated user's membership in that same museum; an ID alone must never determine tenant access. Association writes must also be tenant-scoped: tag assignments, cart items, invoice lines, and tickets may reference only records belonging to the same museum. The database reinforces these rules with composite foreign keys (including collection/tag, cart/product, invoice/item/user/kind, and ticket/invoice-item scope); request handlers should validate scope and return a suitable validation or conflict error rather than exposing raw database errors. Admin-tier assignments must likewise use a tier defined by the membership's museum.
 
 ## 3. Response contract
 

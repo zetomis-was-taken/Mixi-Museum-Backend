@@ -4,9 +4,10 @@ This document is the source of truth for the persisted data model of the museum
 platform. It is written so a coding agent can turn it directly into Drizzle
 schemas and migrations without guessing at intent.
 
-**Status:** design agreed, **not implemented yet**. `src/db/schemas/index.ts` is an
-empty barrel and `drizzle/` has no migrations. When a table below is implemented,
-put it in `src/db/schemas/<aggregate>.ts` and re-export it from the barrel.
+**Status:** implemented in `src/db/schemas/` with Drizzle migrations in `drizzle/`.
+This document describes the intended persisted model and its database-enforced
+integrity rules; service-layer authorization and business rules are called out
+separately.
 
 ---
 
@@ -133,7 +134,7 @@ Admin tiers are **defined per museum** so the founder can customize them
 
 | Column | Type | Constraints / notes |
 | --- | --- | --- |
-| `id` | uuid | PK |
+| `id` | uuid | PK; UNIQUE (`id`, `museum_id`) for composite scope references |
 | `museum_id` | uuid | FK → `museums.id` ON DELETE CASCADE |
 | `name` | text | NOT NULL, UNIQUE (`museum_id`, `name`) |
 | `permissions` | jsonb | NOT NULL DEFAULT `'{}'` — reserved for fine-grained checks (TBD) |
@@ -147,7 +148,7 @@ Membership of an admin in a museum, plus their tier.
 | `id` | uuid | PK |
 | `museum_id` | uuid | FK → `museums.id` ON DELETE CASCADE |
 | `user_id` | uuid | FK → `users.id` ON DELETE CASCADE |
-| `tier_id` | uuid | FK → `admin_tiers.id` ON DELETE SET NULL, NULL allowed |
+| `tier_id` | uuid | Composite FK (`tier_id`, `museum_id`) → `admin_tiers(id, museum_id)` ON DELETE SET NULL, NULL allowed; a membership can only use a tier defined by the same museum |
 | `is_owner` | boolean | NOT NULL DEFAULT false. Co-ownership is allowed; a museum must always keep ≥ 1 owner (enforced in the service layer) |
 | `created_at` | timestamptz | NOT NULL |
 | *(UNIQUE)* | | (`museum_id`, `user_id`) |
@@ -214,8 +215,12 @@ Tags are museum-scoped so different museums can use the same label independently
 
 | Table | Columns |
 | --- | --- |
-| `tags` | `id` uuid PK, `museum_id` FK → museums, `name` text NOT NULL, `slug` text NOT NULL, `created_at`; UNIQUE (`museum_id`, `slug`) |
-| `collection_tags` | `collection_id` FK → collections ON DELETE CASCADE, `tag_id` FK → tags ON DELETE CASCADE; PK (`collection_id`, `tag_id`) |
+| `tags` | `id` uuid PK, `museum_id` FK → museums, `name` text NOT NULL, `slug` text NOT NULL, `created_at`; UNIQUE (`id`, `museum_id`) and UNIQUE (`museum_id`, `slug`) |
+| `collection_tags` | `collection_id`, `tag_id`, `museum_id`; PK (`collection_id`, `tag_id`); composite FKs (`collection_id`, `museum_id`) → `collections(id, museum_id)` and (`tag_id`, `museum_id`) → `tags(id, museum_id)`, both ON DELETE CASCADE |
+
+The shared `museum_id` is a database-enforced scope key: a collection cannot be
+associated with a tag owned by another museum. `collections` likewise has UNIQUE
+(`id`, `museum_id`) to support the composite FK.
 
 ---
 
@@ -260,8 +265,9 @@ One cart per `(user, museum)` pair. Carts exist only for merchandise.
 | Column | Type | Constraints / notes |
 | --- | --- | --- |
 | `id` | uuid | PK |
-| `cart_id` | uuid | FK → `carts.id` ON DELETE CASCADE |
-| `product_id` | uuid | FK → `products.id` ON DELETE CASCADE; cart contents are ephemeral and may disappear when a product/tenant is deleted |
+| `cart_id` | uuid | Part of composite FK (`cart_id`, `museum_id`) → `carts(id, museum_id)` ON DELETE CASCADE |
+| `product_id` | uuid | Part of composite FK (`product_id`, `museum_id`) → `products(id, museum_id)` ON DELETE CASCADE; cart contents are ephemeral |
+| `museum_id` | uuid | Required scope key shared by both composite FKs; prevents cross-museum cart/product links |
 | `quantity` | integer | NOT NULL, CHECK `>= 1` |
 | `created_at` | timestamptz | NOT NULL |
 | *(UNIQUE)* | | (`cart_id`, `product_id`) |
@@ -306,9 +312,11 @@ One row per line. Exactly one of `product_id` / `ticket_type_id` is set. For a t
 | Column | Type | Constraints / notes |
 | --- | --- | --- |
 | `id` | uuid | PK |
-| `invoice_id` | uuid | FK → `invoices.id` ON DELETE CASCADE |
-| `product_id` | uuid | FK → `products.id` ON DELETE RESTRICT, NULL |
-| `ticket_type_id` | uuid | FK → `ticket_types.id` ON DELETE RESTRICT, NULL |
+| `invoice_id` | uuid | Part of composite FK (`invoice_id`, `museum_id`, `user_id`, `invoice_kind`) → `invoices(id, museum_id, user_id, kind)` ON DELETE CASCADE |
+| `museum_id` / `user_id` | uuid | Required scope keys; must match the parent invoice |
+| `invoice_kind` | `invoice_kind` enum | Required; must match the parent invoice and target type |
+| `product_id` | uuid | Nullable, composite FK (`product_id`, `museum_id`) → `products(id, museum_id)` ON DELETE RESTRICT |
+| `ticket_type_id` | uuid | Nullable, composite FK (`ticket_type_id`, `museum_id`) → `ticket_types(id, museum_id)` ON DELETE RESTRICT |
 | `description` | text | NOT NULL — snapshot of the product/type name at purchase |
 | `unit_price_minor` | bigint | NOT NULL, CHECK `>= 0`; currency minor units |
 | `quantity` | integer | NOT NULL, CHECK `>= 1` |
@@ -359,11 +367,11 @@ later admin edits do not rewrite already-sold tickets.
 | Column | Type | Constraints / notes |
 | --- | --- | --- |
 | `id` | uuid | PK |
-| `museum_id` | uuid | FK → `museums.id` ON DELETE RESTRICT (denormalized for scoping/queries) |
-| `ticket_type_id` | uuid | FK → `ticket_types.id` ON DELETE RESTRICT |
-| `invoice_item_id` | uuid | FK → `invoice_items.id` ON DELETE RESTRICT; identifies the purchased ticket line |
-| `user_id` | uuid | FK → `users.id` ON DELETE RESTRICT |
-| `invoice_id` | uuid | FK → `invoices.id` ON DELETE RESTRICT |
+| `museum_id` | uuid | Scope key, constrained by composite FKs to the referenced ticket type, invoice item, and invoice |
+| `ticket_type_id` | uuid | Composite FK (`ticket_type_id`, `museum_id`) → `ticket_types(id, museum_id)` ON DELETE RESTRICT |
+| `invoice_item_id` | uuid | Composite FK (`invoice_item_id`, `invoice_id`, `museum_id`, `user_id`) → `invoice_items(id, invoice_id, museum_id, user_id)` ON DELETE RESTRICT; identifies the purchased ticket line |
+| `user_id` | uuid | FK → `users.id` ON DELETE RESTRICT and part of invoice/item scope FKs |
+| `invoice_id` | uuid | Composite FKs to invoice and invoice-item scope; invoice, item, museum, and user must agree |
 | `currency` | char(3) | NOT NULL, snapshot from invoice/type at issuance; applies ISO-4217 exponent rules |
 | `face_value_minor` | bigint | NOT NULL, CHECK `>= 0`; snapshot amount in minor units |
 | `qr_code` | text | NOT NULL, UNIQUE — unguessable random token (32 bytes, base64url) generated at purchase |
@@ -416,9 +424,15 @@ Enums are Postgres enums created in migrations and reused by Drizzle
 Additional invariants enforced in services, not the DB:
 
 - A museum always has at least one `museum_admins` row with `is_owner = true`.
-- An invoice's `museum_id` matches the museum of every item on it.
-- A `tickets` row's `museum_id` matches its `ticket_type.museum_id`.
 - Stock/capacity are only decremented for `paid` invoices, transactionally.
+
+The database enforces cross-row scope invariants with composite foreign keys:
+
+- A `museum_admins.tier_id` must identify an `admin_tiers` row in the same museum.
+- A `collection_tags` association can only connect a collection and tag in the same museum.
+- A `cart_items` row must reference a cart and product in the same museum.
+- Every `invoice_items` row must match its invoice's museum, user, and kind; its product/ticket type must belong to that museum, and its target column must agree with `invoice_kind` (`merchandise` → product, `ticket` → ticket type).
+- Every `tickets` row must match the museum of its ticket type, and its invoice, invoice item, museum, and user must agree; the invoice item is constrained to a ticket target through its invoice kind.
 - Enabling `shop_enabled`/`tickets_enabled` is an owner-only action.
 
 ---
