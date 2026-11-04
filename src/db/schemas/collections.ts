@@ -1,4 +1,5 @@
 import {
+  foreignKey,
   index,
   integer,
   pgTable,
@@ -26,6 +27,7 @@ export const collections = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    unique('collections_id_museum_id_unique').on(table.id, table.museumId),
     unique('collections_museum_id_slug_unique').on(table.museumId, table.slug),
     index('collections_museum_id_status_index').on(table.museumId, table.status),
   ],
@@ -54,6 +56,7 @@ export const tags = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    unique('tags_id_museum_id_unique').on(table.id, table.museumId),
     unique('tags_museum_id_slug_unique').on(table.museumId, table.slug),
   ],
 );
@@ -61,15 +64,21 @@ export const tags = pgTable(
 export const collectionTags = pgTable(
   'collection_tags',
   {
-    collectionId: uuid('collection_id')
-      .notNull()
-      .references(() => collections.id, { onDelete: 'cascade' }),
-    tagId: uuid('tag_id')
-      .notNull()
-      .references(() => tags.id, { onDelete: 'cascade' }),
+    collectionId: uuid('collection_id').notNull(),
+    tagId: uuid('tag_id').notNull(),
+    museumId: uuid('museum_id').notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.collectionId, table.tagId] }),
+    foreignKey({
+      name: 'collection_tags_collection_museum_fk',
+      columns: [table.collectionId, table.museumId],
+      foreignColumns: [collections.id, collections.museumId],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'collection_tags_tag_museum_fk',
+      columns: [table.tagId, table.museumId],
+      foreignColumns: [tags.id, tags.museumId],
+    }).onDelete('cascade'),
   ],
 );
-

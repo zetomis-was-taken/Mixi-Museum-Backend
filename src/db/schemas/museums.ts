@@ -1,6 +1,7 @@
 import {
   boolean,
   char,
+  foreignKey,
   jsonb,
   numeric,
   pgTable,
@@ -42,6 +43,7 @@ export const adminTiers = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    unique('admin_tiers_id_museum_id_unique').on(table.id, table.museumId),
     unique('admin_tiers_museum_id_name_unique').on(table.museumId, table.name),
   ],
 );
@@ -50,17 +52,25 @@ export const museumAdmins = pgTable(
   'museum_admins',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    museumId: uuid('museum_id')
-      .notNull()
-      .references(() => museums.id, { onDelete: 'cascade' }),
+    museumId: uuid('museum_id').notNull(),
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    tierId: uuid('tier_id').references(() => adminTiers.id, { onDelete: 'set null' }),
+    tierId: uuid('tier_id'),
     isOwner: boolean('is_owner').default(false).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    foreignKey({
+      name: 'museum_admins_museum_id_museums_id_fk',
+      columns: [table.museumId],
+      foreignColumns: [museums.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'museum_admins_tier_museum_fk',
+      columns: [table.tierId, table.museumId],
+      foreignColumns: [adminTiers.id, adminTiers.museumId],
+    }).onDelete('set null'),
     unique('museum_admins_museum_id_user_id_unique').on(table.museumId, table.userId),
   ],
 );

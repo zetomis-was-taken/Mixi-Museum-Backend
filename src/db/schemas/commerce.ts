@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import {
   bigint,
   check,
+  foreignKey,
   index,
   integer,
   pgTable,
@@ -31,6 +32,7 @@ export const products = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    unique('products_id_museum_id_unique').on(table.id, table.museumId),
     unique('products_museum_id_slug_unique').on(table.museumId, table.slug),
     index('products_museum_id_status_index').on(table.museumId, table.status),
     check('products_price_minor_check', sql`${table.priceMinor} >= 0`),
@@ -63,6 +65,7 @@ export const carts = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    unique('carts_id_museum_id_unique').on(table.id, table.museumId),
     unique('carts_user_id_museum_id_unique').on(table.userId, table.museumId),
   ],
 );
@@ -71,16 +74,23 @@ export const cartItems = pgTable(
   'cart_items',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    cartId: uuid('cart_id')
-      .notNull()
-      .references(() => carts.id, { onDelete: 'cascade' }),
-    productId: uuid('product_id')
-      .notNull()
-      .references(() => products.id, { onDelete: 'cascade' }),
+    cartId: uuid('cart_id').notNull(),
+    productId: uuid('product_id').notNull(),
+    museumId: uuid('museum_id').notNull(),
     quantity: integer('quantity').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    foreignKey({
+      name: 'cart_items_cart_museum_fk',
+      columns: [table.cartId, table.museumId],
+      foreignColumns: [carts.id, carts.museumId],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'cart_items_product_museum_fk',
+      columns: [table.productId, table.museumId],
+      foreignColumns: [products.id, products.museumId],
+    }).onDelete('cascade'),
     unique('cart_items_cart_id_product_id_unique').on(table.cartId, table.productId),
     check('cart_items_quantity_check', sql`${table.quantity} >= 1`),
   ],
