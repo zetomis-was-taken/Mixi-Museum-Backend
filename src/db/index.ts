@@ -10,6 +10,9 @@ export const pool = new Pool({
 
 export const db = drizzle({ client: pool, schema });
 
+/** Type of the shared Drizzle client, used by services and repositories. */
+export type Database = typeof db;
+
 export async function closeDb(): Promise<void> {
   await pool.end();
 }
