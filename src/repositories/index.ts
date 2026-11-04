@@ -1,0 +1,20 @@
+import { db } from '../db/index.js';
+import * as schema from '../db/schemas/index.js';
+import { createRepository } from './base.repository.js';
+
+export const usersRepository = createRepository(db, schema.users);
+export const museumsRepository = createRepository(db, schema.museums);
+export const adminTiersRepository = createRepository(db, schema.adminTiers);
+export const museumAdminsRepository = createRepository(db, schema.museumAdmins);
+export const collectionsRepository = createRepository(db, schema.collections);
+export const collectionImagesRepository = createRepository(db, schema.collectionImages);
+export const tagsRepository = createRepository(db, schema.tags);
+export const collectionTagsRepository = createRepository(db, schema.collectionTags);
+export const productsRepository = createRepository(db, schema.products);
+export const productImagesRepository = createRepository(db, schema.productImages);
+export const cartsRepository = createRepository(db, schema.carts);
+export const cartItemsRepository = createRepository(db, schema.cartItems);
+export const invoicesRepository = createRepository(db, schema.invoices);
+export const invoiceItemsRepository = createRepository(db, schema.invoiceItems);
+export const ticketTypesRepository = createRepository(db, schema.ticketTypes);
+export const ticketsRepository = createRepository(db, schema.tickets);
